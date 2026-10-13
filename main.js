@@ -26,6 +26,7 @@
   var acc = 0;
   var last = 0;
   var rafId = 0;
+  var vvRaf = 0;
 
   // -------- DOM --------
   var canvas, hud, heartsEl, xpFill, lvlNum, timeNum, killNum, scoreNum, bladeNum;
@@ -100,6 +101,13 @@
     window.addEventListener('orientationchange', function () { setTimeout(onResize, 60); });
     document.addEventListener('visibilitychange', onVisibility);
 
+    // 移动端工具栏/地址栏显隐：visualViewport 变化时重算画布尺寸。
+    // 不支持 visualViewport 的浏览器保持原有行为不变。
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', onViewportChange);
+      window.visualViewport.addEventListener('scroll', onViewportChange);
+    }
+
     if (window.ResizeObserver) {
       try { new ResizeObserver(onResize).observe(canvas); } catch (e) { /* ignore */ }
     }
@@ -119,6 +127,11 @@
 
   function onResize() {
     if (Render && Render.resize) Render.resize();
+  }
+  function onViewportChange() {
+    // 地址栏 / 工具栏显隐会让 visualViewport 抖动，用 rAF 合并重排。
+    if (vvRaf) return;
+    vvRaf = requestAnimationFrame(function () { vvRaf = 0; onResize(); });
   }
   function onVisibility() {
     // 切后台/回前台：清空累加器，避免大跳步

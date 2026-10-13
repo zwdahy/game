@@ -1,6 +1,6 @@
 /* ============================================================
    转刀生存 — 输入层 (window.Input)
-   键盘 WASD / 方向键 + 触屏左半屏动态虚拟摇杆（鼠标拖动亦可）。
+   键盘 WASD / 方向键 + 触屏动态虚拟摇杆（鼠标拖动亦可）。
    getVector() 返回 {x,y}，方向 -1..1，斜向已归一化。
    传统脚本，必须在 render.js 之后、main.js 之前加载。
    ============================================================ */
@@ -66,33 +66,36 @@
   }
 
   // -------------------------------------------------------------
-  // 触摸事件（左半屏动态摇杆）
+  // 触摸事件（画布上任意位置动态摇杆）
+  // touchstart 仅绑定画布（覆盖层按钮的触摸不会启动摇杆）；
+  // touchmove/touchend/touchcancel 绑定 window，保证松手必定被捕获。
   // -------------------------------------------------------------
   function onTouchStart(e) {
     if (e.cancelable) e.preventDefault();
     if (joystick.active && touchId !== null) return;
     for (var i = 0; i < e.changedTouches.length; i++) {
       var t = e.changedTouches[i];
-      if (t.clientX < window.innerWidth * 0.5) {
-        touchId = t.identifier;
-        startStick(t.clientX, t.clientY);
+      touchId = t.identifier;
+      startStick(t.clientX, t.clientY);
+      break;
+    }
+  }
+  function onTouchMove(e) {
+    if (touchId === null) return;        // 非摇杆触摸：不 preventDefault，保留覆盖层滚动
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      if (t.identifier === touchId) {
+        if (e.cancelable) e.preventDefault();
+        moveStick(t.clientX, t.clientY);
         break;
       }
     }
   }
-  function onTouchMove(e) {
-    if (e.cancelable) e.preventDefault();
-    if (touchId === null) return;
-    for (var i = 0; i < e.changedTouches.length; i++) {
-      var t = e.changedTouches[i];
-      if (t.identifier === touchId) { moveStick(t.clientX, t.clientY); break; }
-    }
-  }
   function onTouchEnd(e) {
-    if (e.cancelable) e.preventDefault();
-    if (touchId === null) return;
+    if (touchId === null) return;        // 非摇杆触摸：不 preventDefault，保留按钮点击
     for (var i = 0; i < e.changedTouches.length; i++) {
       if (e.changedTouches[i].identifier === touchId) {
+        if (e.cancelable) e.preventDefault();
         touchId = null;
         endStick();
         break;
@@ -119,19 +122,32 @@
   }
 
   // -------------------------------------------------------------
+  // 重置（失焦 / 页面隐藏时清理，避免摇杆卡死）
+  // -------------------------------------------------------------
+  Input.reset = function () {
+    touchId = null;
+    endStick();
+    mouseActive = false;
+    clearKeys();
+  };
+
+  // -------------------------------------------------------------
   // 初始化
   // -------------------------------------------------------------
   Input.init = function (cv) {
     canvas = cv || canvas || document.getElementById('game');
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
-    window.addEventListener('blur', clearKeys);
+    window.addEventListener('blur', Input.reset);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) Input.reset();
+    });
 
     if (canvas) {
       canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-      canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-      canvas.addEventListener('touchend', onTouchEnd, { passive: false });
-      canvas.addEventListener('touchcancel', onTouchEnd, { passive: false });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd, { passive: false });
+      window.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
       if (window.PointerEvent) {
         canvas.addEventListener('pointerdown', onPointerDown);

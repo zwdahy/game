@@ -51,7 +51,7 @@
     orbLimit: 400,
     level: { baseXp: 5, xpGrowth: 4 },
     bossScore: 400, eliteScore: 60, normalScore: 10,
-    terrain: { rocks: 26, trees: 20, minGap: 32, spawnClear: 130, rockRMin: 20, rockRMax: 34, treeRadius: 20, crownMin: 30, crownMax: 36 }
+    terrain: { rocks: 12, trees: 14, minGap: 32, spawnClear: 130, rockRMin: 20, rockRMax: 34, treeRadius: 20, crownMin: 30, crownMax: 36 }
   };
 
   /* ======================================================================
