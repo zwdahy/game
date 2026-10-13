@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#060a12" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060a12'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2335f0e0'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='%23eafffb'/%3E%3Cpath d='M16 16 L27 9 L19 18 Z' fill='%2335f0e0'/%3E%3Cpath d='M16 16 L5 23 L13 14 Z' fill='%23ff3ea5'/%3E%3C/svg%3E" />
+  <title>转刀生存</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game" aria-label="游戏画面"></canvas>
+
+  <!-- 战斗内 HUD -->
+  <div id="hud" hidden>
+    <div class="hud-top">
+      <div class="hearts" id="hearts" aria-label="生命值"></div>
+      <div class="hud-right">
+        <div class="timer" id="timeNum">00:00</div>
+        <button class="icon-btn" id="pauseBtn" type="button" aria-label="暂停">暂停</button>
+      </div>
+    </div>
+    <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
+    <div class="hud-stats">
+      <span class="stat"><i>等级</i><b id="lvlNum">1</b></span>
+      <span class="stat"><i>击杀</i><b id="killNum">0</b></span>
+      <span class="stat"><i>分数</i><b id="scoreNum">0</b></span>
+      <span class="stat"><i>刀刃</i><b id="bladeNum">0/0</b></span>
+    </div>
+  </div>
+
+  <!-- 开始页 -->
+  <div class="overlay" id="startOverlay">
+    <div class="panel">
+      <div class="brand">
+        <span class="brand-blade"></span>
+        <span class="brand-dot"></span>
+      </div>
+      <h1 class="title">转刀生存</h1>
+      <p class="subtitle">绕身刀刃自动斩杀，活得更久，拿更高分</p>
+      <p class="lead">移动角色，让环绕的刀刃切碎靠近的敌人。刀刃会被敌人的刀抵消，攒满经验即可升级强化。</p>
+      <ul class="howto">
+        <li><b>移动</b>：电脑用 WASD 或方向键；手机在屏幕左半区按住拖动。</li>
+        <li><b>战斗</b>：刀刃自动环绕，接触敌人造成伤害；被敌方刀刃抵消的刀会短暂失效。</li>
+        <li><b>成长</b>：拾取蓝色经验球升级，从三张强化卡中选择一张。</li>
+      </ul>
+      <button class="btn primary" id="startBtn" type="button">开始游戏</button>
+    </div>
+  </div>
+
+  <!-- 升级选卡 -->
+  <div class="overlay" id="levelOverlay" hidden>
+    <div class="panel level-panel">
+      <h2 class="level-title">选择强化</h2>
+      <div class="cards" id="cards"></div>
+    </div>
+  </div>
+
+  <!-- 暂停 -->
+  <div class="overlay" id="pauseOverlay" hidden>
+    <div class="panel small-panel">
+      <h2 class="title small">已暂停</h2>
+      <div class="row">
+        <button class="btn" id="resumeBtn" type="button">继续</button>
+        <button class="btn ghost" id="restartBtn2" type="button">重新开始</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结束页 -->
+  <div class="overlay" id="endOverlay" hidden>
+    <div class="panel">
+      <h2 class="result">游戏结束</h2>
+      <div class="stat-grid">
+        <div class="stat-cell"><i>本局分数</i><b id="endScore">0</b></div>
+        <div class="stat-cell"><i>存活时间</i><b id="endTime">00:00</b></div>
+        <div class="stat-cell"><i>击杀数</i><b id="endKills">0</b></div>
+        <div class="stat-cell best"><i>最高分</i><b id="endBest">0</b></div>
+      </div>
+      <p class="best-line" id="bestLine"></p>
+      <button class="btn primary" id="againBtn" type="button">再来一局</button>
+    </div>
+  </div>
+
+  <script src="engine.js"></script>
+  <script src="sprites.js"></script>
+  <script src="render.js"></script>
+  <script src="input.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
