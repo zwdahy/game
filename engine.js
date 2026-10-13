@@ -727,7 +727,7 @@
   }
 
   function updateScore(state) {
-    state.stats.score = Math.floor(state.time * 10) + state.stats.killScore;
+    state.stats.score = state.stats.killScore;
   }
 
   /* ======================================================================
