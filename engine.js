@@ -31,7 +31,7 @@
     spawnPoint: { x: 900, y: 700 },
     player: {
       startHp: 5, maxHpCap: 10, speed: 165, pickupRadius: 78, attack: 14,
-      orbitRadius: 42, bladeLength: 54, rotationSpeed: 3.6, bladeCount: 2, bladeCountCap: 12,
+      orbitRadius: 42, bladeLength: 54, rotationSpeed: 3.6, bladeCount: 2, bladeCountCap: 50,
       recoverySlots: 1, recoverySlotsCap: 6, recoveryTime: 2.5,
       hitCooldown: 0.22, radius: 14, invuln: 1.6
     },
@@ -59,7 +59,7 @@
    * ==================================================================== */
   var CARDS = [
     { id: 'speed',         title: '疾风', desc: '移动速度 +12%',           icon: 'SPD' },
-    { id: 'bladeCount',    title: '增刃', desc: '刀刃数量 +1 (上限 12)',    icon: 'CNT' },
+    { id: 'bladeCount',    title: '增刃', desc: '刀刃数量 +1 (上限 50)',    icon: 'CNT' },
     { id: 'bladeLength',   title: '长刃', desc: '刀刃长度 +15%',           icon: 'LEN' },
     { id: 'attack',        title: '利刃', desc: '攻击力 +18%',             icon: 'ATK' },
     { id: 'rotationSpeed', title: '疾旋', desc: '旋转速度 +12%',           icon: 'ROT' },
