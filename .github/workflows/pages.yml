@@ -32,15 +32,20 @@ jobs:
       - name: Run engine tests
         run: node engine.test.cjs
 
+      - name: Run road-rush engine tests
+        run: node road-rush/engine.test.cjs
+
       - name: Build site with versioned assets
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site
+          mkdir -p _site _site/road-rush
           cp index.html style.css engine.js sprites.js render.js input.js main.js _site/
+          cp road-rush/index.html road-rush/style.css road-rush/engine.js road-rush/sprites.js road-rush/render.js road-rush/input.js road-rush/main.js _site/road-rush/
           touch _site/.nojekyll
           VERSION="${GITHUB_SHA::8}"
           node tools/stamp-version.mjs _site/index.html "$VERSION"
+          node tools/stamp-version.mjs _site/road-rush/index.html "$VERSION"
           echo "Deployed version: $VERSION"
 
       - name: Upload Pages artifact

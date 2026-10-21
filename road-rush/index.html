@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#1B2430">
+<meta name="description" content="公路突围——拖住方向，选对门，带人冲到最后。">
+<title>公路突围</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231B2430'/%3E%3Cpath d='M12 35c0-11 9-20 20-20s20 9 20 20v9H12z' fill='%23F2C94C' stroke='%23FFF6E5' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M19 37h26l-4 8H23z' fill='%232F80ED' stroke='%231B2430' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpath d='M26 49h12' stroke='%23FFF6E5' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="game" aria-label="公路突围游戏画面"></canvas>
+
+<!-- ============ 游戏内 HUD ============ -->
+<header id="hud" class="hud" hidden>
+  <div class="hud-inner">
+
+    <div class="hud-row">
+      <div class="people-card">
+        <div class="people-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" focusable="false">
+            <circle cx="8.2" cy="8.5" r="2.7" fill="#FFF6E5" stroke="#1B2430" stroke-width="1.5"/>
+            <path d="M3 19c0-3 2.4-5 5.2-5s5.2 2 5.2 5" fill="#FFF6E5" stroke="#1B2430" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="16.5" cy="7.4" r="2.1" fill="#FFF6E5" stroke="#1B2430" stroke-width="1.5"/>
+            <path d="M12.9 18.8c0-2.5 1.8-4.1 3.9-4.1s3.9 1.6 3.9 4.1" fill="#FFF6E5" stroke="#1B2430" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="people-copy">
+          <span class="people-label">队伍</span>
+          <div class="people-line">
+            <span id="peopleNum">0</span>
+            <span class="people-unit">人</span>
+          </div>
+        </div>
+        <span class="people-warn" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M12 3 22.5 21H1.5L12 3Z" fill="#FF5A5F" stroke="#1B2430" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M12 9v5" stroke="#FFF6E5" stroke-width="2.6" stroke-linecap="round"/>
+            <circle cx="12" cy="17.6" r="1.4" fill="#FFF6E5"/>
+          </svg>
+        </span>
+      </div>
+
+      <div class="stat-stack">
+        <div class="stat-line">
+          <span class="stat-key">关卡</span>
+          <span id="levelNum">1/3</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">武器</span>
+          <span id="weaponNum">Lv.1 手枪</span>
+        </div>
+      </div>
+
+      <button id="pauseBtn" class="icon-btn" type="button" aria-label="暂停游戏">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="5.5" y="4.5" width="4.6" height="15" rx="1.6" fill="currentColor"/>
+          <rect x="13.9" y="4.5" width="4.6" height="15" rx="1.6" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="progress-wrap" aria-hidden="true">
+      <div id="progressTrack" class="progress-track">
+        <div id="progressFill"></div>
+      </div>
+    </div>
+
+    <div id="bossWrap" class="boss-wrap" hidden>
+      <div class="boss-head">
+        <span class="boss-tag">BOSS</span>
+        <span id="bossName">路障巨尸</span>
+      </div>
+      <div class="boss-track">
+        <div id="bossFill"></div>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ============ 关卡开场横幅 ============ -->
+<div id="banner" role="status" aria-live="polite"></div>
+
+<!-- ============ 开始界面 ============ -->
+<div id="startOverlay" class="overlay start-overlay" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+  <div class="panel start-panel">
+
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" focusable="false">
+          <path d="M13 36c0-11.6 8.5-21 19-21s19 9.4 19 21v9H13v-9Z" fill="#F2C94C" stroke="#1B2430" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M19 38h26l-4 9H23l-4-9Z" fill="#FFF6E5" stroke="#1B2430" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M24 39h16" stroke="#2F80ED" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M11 48h42" stroke="#FFF6E5" stroke-width="4" stroke-linecap="round"/>
+          <path d="M22 25c2.2-4.2 5.5-6.2 10-6.2s7.8 2 10 6.2" stroke="#FFF6E5" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M32 22v7" stroke="#FFF6E5" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-copy">
+        <span class="brand-eyebrow">ROAD RUSH</span>
+        <h1 id="gameTitle">公路突围</h1>
+      </div>
+    </div>
+
+    <p class="tagline">拖住方向，选对门，带人冲到最后</p>
+
+    <div class="section-head">
+      <h2 class="section-title">出发关卡</h2>
+      <span class="section-note">逐关解锁</span>
+    </div>
+    <div id="levelRow" class="level-row" role="group" aria-label="选择关卡"></div>
+
+    <ul class="steps">
+      <li class="step">
+        <span class="step-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M3.5 12h17"/>
+            <path d="m7.5 8-4 4 4 4"/>
+            <path d="m16.5 8 4 4-4 4"/>
+          </svg>
+        </span>
+        <div class="step-copy">
+          <strong>左右拖动选门</strong>
+          <small>看准人数增减，再决定往哪边冲</small>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <circle cx="12" cy="8" r="2.6"/>
+            <path d="M7 19c0-2.8 2.2-5 5-5s5 2.2 5 5"/>
+            <circle cx="5.2" cy="10.2" r="1.6"/>
+            <path d="M2.8 18.2c0-1.7 1.2-3 2.8-3.2"/>
+            <circle cx="18.8" cy="10.2" r="1.6"/>
+            <path d="M21.2 18.2c0-1.7-1.2-3-2.8-3.2"/>
+          </svg>
+        </span>
+        <div class="step-copy">
+          <strong>人数就是火力也是命</strong>
+          <small>人越多，子弹越密；别把自己冲散</small>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <rect x="6.2" y="5.2" width="11.6" height="15" rx="2.4"/>
+            <path d="M6.2 9.6h11.6"/>
+            <path d="M6.2 15.4h11.6"/>
+            <path d="M12 3v1.6"/>
+            <path d="m12 11.4.9 1.7 1.9.3-1.4 1.4.3 1.9-1.7-.9-1.7.9.3-1.9-1.4-1.4 1.9-.3.9-1.7Z" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <div class="step-copy">
+          <strong>打爆武器箱换枪</strong>
+          <small>越高级箱子越硬；油桶清场，怪物掉补给</small>
+        </div>
+      </li>
+    </ul>
+
+    <button id="startBtn" class="btn btn-primary btn-block start-button" type="button">
+      <span>开始突围</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3.5 12h16"/>
+        <path d="m13.5 6 6 6-6 6"/>
+      </svg>
+    </button>
+
+    <p class="hint"><span>键盘</span><kbd>A</kbd><span>/</span><kbd>D</kbd><span>也可以转向</span></p>
+  </div>
+</div>
+
+<!-- ============ 暂停界面 ============ -->
+<div id="pauseOverlay" class="overlay pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" hidden>
+  <div class="panel small-panel">
+    <div class="pause-emblem" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <rect x="5.5" y="4" width="4.7" height="16" rx="1.8" fill="currentColor"/>
+        <rect x="13.8" y="4" width="4.7" height="16" rx="1.8" fill="currentColor"/>
+      </svg>
+    </div>
+    <span class="panel-eyebrow">PAUSED</span>
+    <h2 id="pauseTitle" class="panel-title">已暂停</h2>
+    <p class="panel-sub">队伍原地待命，随时可以继续</p>
+    <div class="btn-stack">
+      <button id="resumeBtn" class="btn btn-primary btn-block" type="button">继续</button>
+      <button id="restartBtn" class="btn btn-secondary btn-block" type="button">重开</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 结算界面 ============ -->
+<div id="resultOverlay" class="overlay result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
+  <div class="panel result-panel">
+    <div class="result-head">
+      <span class="panel-eyebrow">战报</span>
+      <h2 id="resultTitle" class="panel-title">关卡突破</h2>
+      <p id="resultSub" class="panel-sub">剩余 12 人 · 武器 Lv.2 双管</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-name">剩余人数</span>
+        <strong id="resultPeople" class="stat-value">0</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-name">击杀</span>
+        <strong id="resultKills" class="stat-value">0</strong>
+      </div>
+      <div class="stat stat-score">
+        <span class="stat-name">本局分数</span>
+        <strong id="resultScore" class="stat-value">0</strong>
+      </div>
+      <div class="stat stat-best">
+        <span class="stat-name">最高分</span>
+        <strong id="resultBest" class="stat-value">0</strong>
+      </div>
+    </div>
+
+    <div class="btn-stack result-actions">
+      <button id="nextBtn" class="btn btn-primary btn-block" type="button">下一关</button>
+      <button id="retryBtn" class="btn btn-secondary btn-block" type="button">重打本关</button>
+    </div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="sprites.js"></script>
+<script src="render.js"></script>
+<script src="input.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
